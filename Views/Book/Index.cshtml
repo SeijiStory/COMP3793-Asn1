@@ -1,0 +1,36 @@
+@model IEnumerable<asn1.Models.Book>
+
+@{
+    ViewData["Title"] = "Harry Potter Book List";
+}
+
+<h1>Harry Potter Book List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Thumbnail)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                <img src="@Html.DisplayFor(modelItem => item.Thumbnail)" alt="Thumbnail: @Html.DisplayFor(modelItem => item.Title)" />
+            </td>
+            <td>
+                @Html.ActionLink("Details", "Details", new { id = item.BookID })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
