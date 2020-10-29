@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using asn1.Models;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,19 +14,31 @@ using Newtonsoft.Json.Linq;
 
 namespace asn1.Controllers
 {
+    [Authorize]
     public class BookController : Controller
     {
+        private const string BASE_URL = "https://www.googleapis.com/books/v1/volumes";
+        private const string QUERY_STRING = "?q=harry+potter";
         private Book SeedBook(JToken token) {
+            HtmlDocument htmlDoc = new HtmlDocument();
             var isbn = token["volumeInfo"]["industryIdentifiers"].Children().ToList().
                 Where(i => i["type"].ToString().Equals("ISBN_10")).
                 FirstOrDefault();
             string desc = "No description available";
             JToken tmp;
             if ((tmp = token["volumeInfo"]["description"]) != null) {
-                desc = tmp.ToString();
+                desc = HttpUtility.HtmlDecode(tmp.ToString());
+                /*
+                htmlDoc.LoadHtml(HttpUtility.HtmlDecode(tmp.ToString()));
+                desc = htmlDoc.DocumentNode.InnerText;
+                /**/
             } else if ((tmp = token["searchInfo"]["textSnippet"]) != null) {
+                desc = HttpUtility.HtmlDecode(tmp.ToString());
                 /* Use search info if description not available; decode HTML to convert escapes to literals */
-                desc = HttpUtility.HtmlDecode(tmp.ToString()); 
+                /*
+                htmlDoc.LoadHtml(HttpUtility.HtmlDecode(tmp.ToString()));
+                desc = htmlDoc.DocumentNode.InnerText;
+                /**/
             }
             Book b = new Book {
                 BookID = (string)token["id"],
@@ -40,12 +53,15 @@ namespace asn1.Controllers
             return b;
         }
         // GET: Book
-        public ActionResult Index()
+        public async Task<ActionResult> IndexAsync()
         {
             List<Book> books = new List<Book>();
-            WebClient client = new WebClient();
-            string booksJsonString = client.DownloadString("https://www.googleapis.com/books/v1/volumes?q=harry+potter");
-            if (booksJsonString != "") {
+            string booksJsonString = null;
+            using (var client = new WebClient()) {
+                client.Headers.Set("Accept", "application/json");
+                booksJsonString = await client.DownloadStringTaskAsync(new Uri($"{BASE_URL}{QUERY_STRING}"));
+            }
+            if (booksJsonString != null) {
                 JObject booksJson = JObject.Parse(booksJsonString);
                 JArray itemsJson = (JArray)booksJson["items"];
                 var items = itemsJson.ToList();
@@ -57,17 +73,19 @@ namespace asn1.Controllers
         }
 
         // GET: Book/Details/5
-        [Authorize]
-        public ActionResult Details(string id)
+        public async Task<ActionResult> DetailsAsync(string id)
         {
-            Book b = new Book();
-            WebClient client = new WebClient();
-            string booksJsonString = client.DownloadString("https://www.googleapis.com/books/v1/volumes?q=harry+potter");
-            if (booksJsonString != "") {
-                JObject booksJson = JObject.Parse(booksJsonString);
-                JArray itemsJson = (JArray)booksJson["items"];
-                b = SeedBook(itemsJson.Children().Where(i => i["id"].ToString().Equals(id)).FirstOrDefault());
+            Book b = null;
+            string booksJsonString = null;
+            using (var client = new WebClient()) {
+                client.Headers.Set("Accept", "application/json");
+                booksJsonString = await client.DownloadStringTaskAsync(new Uri($"{BASE_URL}/{id}{QUERY_STRING}"));
             }
+            if (booksJsonString != null) {
+                JObject booksJson = JObject.Parse(booksJsonString);
+                b = SeedBook(booksJson);
+            }
+            if (b == null) return NotFound();
             return View(b);
         }
     }
