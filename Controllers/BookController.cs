@@ -47,6 +47,7 @@ namespace asn1.Controllers
             }
             string isbn_str = isbn["identifier"].ToString();
             if (isbn_str == null || isbn_str == "") isbn_str = "0";
+            _logger.LogInformation(token["volumeInfo"]["title"].ToString() + ":");
             _logger.LogInformation(isbn["identifier"].ToString());
             Book b = new Book {
                 BookID = (string)token["id"],
