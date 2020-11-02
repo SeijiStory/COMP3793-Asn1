@@ -40,6 +40,8 @@ namespace asn1.Controllers
                 desc = htmlDoc.DocumentNode.InnerText;
                 /**/
             }
+            string isbn_str = isbn["identifier"].ToString();
+            if (isbn_str == null || isbn_str == "") isbn_str = "0";
             Book b = new Book {
                 BookID = (string)token["id"],
                 Title = (string)token["volumeInfo"]["title"],
@@ -48,7 +50,7 @@ namespace asn1.Controllers
                 Publisher = (string)token["volumeInfo"]["publisher"],
                 PublishedDate = (string)token["volumeInfo"]["publishedDate"],
                 Description = desc,
-                ISBN_10 = Int32.Parse(isbn["identifier"].ToString())
+                ISBN_10 = Int32.Parse(isbn_str)
             };
             return b;
         }
