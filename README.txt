@@ -22,6 +22,11 @@ Any Major Challenges:
   The biggest challenge was probably figuring out how to serialize the
   JSON object into a book object; the JSON layout does not exacly fit
   the model of the Book model, so I had to write a custom function to
-  serialize the Book models from JSON.
+  serialize the Book models from JSON. A secondary challenge was dealing
+  with unexpected inputs; I had assumed that ISBN_10 would always come
+  as a string that was convertable to int, so when the application ran
+  into an ISBN with an X in it, it crashed, so I had to actually log the
+  output and explore the API to realize that the ISBNs could contain 
+  non-integer values.
 
 Any Special Instructions For Testing Your App: N/A
