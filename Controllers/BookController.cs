@@ -9,6 +9,7 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -17,6 +18,10 @@ namespace asn1.Controllers
     [Authorize]
     public class BookController : Controller
     {
+        private readonly ILogger _logger;
+        public BookController(ILogger<BookController> logger) {
+            _logger = logger;
+        }
         private const string BASE_URL = "https://www.googleapis.com/books/v1/volumes";
         private const string QUERY_STRING = "?q=harry+potter";
         private Book SeedBook(JToken token) {
@@ -42,6 +47,7 @@ namespace asn1.Controllers
             }
             string isbn_str = isbn["identifier"].ToString();
             if (isbn_str == null || isbn_str == "") isbn_str = "0";
+            _logger.LogInformation(isbn["identifier"].ToString());
             Book b = new Book {
                 BookID = (string)token["id"],
                 Title = (string)token["volumeInfo"]["title"],
