@@ -45,10 +45,10 @@ namespace asn1.Controllers
                 desc = htmlDoc.DocumentNode.InnerText;
                 /**/
             }
-            string isbn_str = isbn["identifier"].ToString();
-            if (isbn_str == null || isbn_str == "") isbn_str = "0";
-            _logger.LogInformation(token["volumeInfo"]["title"].ToString() + ":");
-            _logger.LogInformation(isbn["identifier"].ToString());
+            _logger.LogInformation(
+                token["id"].ToString() + " " +
+                token["volumeInfo"]["title"].ToString() + ": " +
+                isbn["identifier"].ToString());
             Book b = new Book {
                 BookID = (string)token["id"],
                 Title = (string)token["volumeInfo"]["title"],
@@ -57,7 +57,7 @@ namespace asn1.Controllers
                 Publisher = (string)token["volumeInfo"]["publisher"],
                 PublishedDate = (string)token["volumeInfo"]["publishedDate"],
                 Description = desc,
-                ISBN_10 = Int32.Parse(isbn_str)
+                ISBN_10 = isbn["identifier"].ToString()
             };
             return b;
         }

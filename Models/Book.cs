@@ -13,6 +13,6 @@ namespace asn1.Models {
         public string PublishedDate { get; set; }
         public string Description { get; set; }
         [Display (Name = "ISBN")]
-        public int ISBN_10 { get; set; }
+        public string ISBN_10 { get; set; }
     }
 }
