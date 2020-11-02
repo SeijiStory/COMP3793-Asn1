@@ -84,7 +84,7 @@ namespace asn1.Controllers
                 booksJsonString = await client.DownloadStringTaskAsync(new Uri($"{BASE_URL}/{id}{QUERY_STRING}"));
             }
             if (booksJsonString != null) {
-                JObject booksJson = JObject.Parse(booksJsonString);
+                JToken booksJson = JObject.Parse(booksJsonString);
                 b = SeedBook(booksJson);
             }
             if (b == null) return NotFound();
